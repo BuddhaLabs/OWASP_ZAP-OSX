@@ -1,27 +1,41 @@
 #!/usr/bin/env bash
 
-#Check the java version (min java 7)
-JAVAV=`java -version 2>&1 |awk 'NR==1{ gsub(/"/,""); print $3 }'`
+# Extract and check the Java version
+JAVA_OUTPUT=$(java -version 2>&1)
 
-if [[ $JAVAV == 1.[78]* ]]; then
-    # OK
-    echo "Using Java version: $JAVAV"
+# Catch warning: Unable to find a $JAVA_HOME at "/usr", continuing with system-provided Java
+if [ "`echo ${JAVA_OUTPUT} | grep "continuing with system-provided Java"`" ] ; then
+	echo "WARNING, \$JAVA_HOME could be set incorrectly, Java's error is:"
+	echo "    " $JAVA_OUTPUT
+	echo "Unsetting JAVA_HOME and continuing with ZAP start-up"
+	unset JAVA_HOME
+	JAVA_OUTPUT=$(java -version 2>&1)
+fi
+
+JAVA_VERSION=$(echo ${JAVA_OUTPUT} | awk -F\" 'NR == 1 { print $2 }')
+
+JAVA_MAJOR_VERSION=${JAVA_VERSION%%.*}
+JAVA_MINOR_VERSION=$(echo $JAVA_VERSION | awk -F\. '{ print $2 }')
+
+if [ $JAVA_MAJOR_VERSION -ge 1 ] && [ $JAVA_MINOR_VERSION -ge 7 ]; then
+	echo "Found Java version $JAVA_VERSION"
 else
-    echo "Exiting: ZAP requires a minimum of Java 7 to run. Found $JAVAV"
-    exit 1
+	echo "Exiting: ZAP requires a minimum of Java 7 to run, found $JAVA_VERSION"
+	exit 1
 fi
 
 #Dereference from link to the real directory
-SCRIPTNAME=$0
+SCRIPTNAME="$0"
 
 #While name of this script is symbolic link
-while [ -L "$SCRIPTNAME" ] ; do 
-    #Dereference the link to the name of the link target 
-    SCRIPTNAME=$(ls -l "$SCRIPTNAME" | awk '{ print $NF; }')
+while [ -L "${SCRIPTNAME}" ] ; do
+	cd "`dirname "${SCRIPTNAME}"`" > /dev/null
+	SCRIPTNAME="$(readlink "`basename "${SCRIPTNAME}"`")"
 done
+cd "`dirname "${SCRIPTNAME}"`" > /dev/null
 
 #Base directory where ZAP is installed
-BASEDIR=$(dirname "$SCRIPTNAME")
+BASEDIR="`pwd -P`"
 
 #Switch to the directory where ZAP is installed
 cd "$BASEDIR"
@@ -64,5 +78,5 @@ fi
 
 #Start ZAP
 
-exec java ${JMEM} -XX:PermSize=256M -jar "${BASEDIR}/zap.jar" $*
+exec java ${JMEM} -XX:PermSize=256M -jar "${BASEDIR}/zap.jar" "$@"
 

@@ -13,6 +13,12 @@
 			<prompt>false</prompt>
 		</proxyChain>
 		<auth></auth>
+		<securityProtocolsEnabled>
+			<protocol>SSLv3</protocol>
+			<protocol>TLSv1</protocol>
+			<protocol>TLSv1.1</protocol>
+			<protocol>TLSv1.2</protocol>
+		</securityProtocolsEnabled>
 	</connection>
 	<proxy>
 		<ip>localhost</ip>
@@ -23,6 +29,12 @@
 			<httpPort>80</httpPort>
 			<httpsPort>443</httpsPort>
 		</reverseProxy>		
+		<securityProtocolsEnabled>
+			<protocol>SSLv3</protocol>
+			<protocol>TLSv1</protocol>
+			<protocol>TLSv1.1</protocol>
+			<protocol>TLSv1.2</protocol>
+		</securityProtocolsEnabled>
 	</proxy>
 	<view>
 		<processImages>0</processImages>
@@ -32,7 +44,7 @@
 		<showMainToolbar>1</showMainToolbar>
 	</view>
     <start>
-        <checkForUpdates>0</checkForUpdates>
+        <checkForUpdates>false</checkForUpdates>
     </start>
     
 	<certificate>
@@ -63,10 +75,6 @@
 		<threadPerHost>5</threadPerHost>
 		<maxPort>10240</maxPort>
 	</portscan>
-	
-	<bruteforce>
-		<threadPerHost>10</threadPerHost>
-	</bruteforce>
 	
 	<pscans>
 		<autoTagScanners>
